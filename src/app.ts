@@ -38,15 +38,45 @@ const logger = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
-app.get("/", logger, (req: Request, res: Response) => {
-  res.send("Hello world!");
-});
+app.get(
+  "/",
+  logger,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.send(something);
+    } catch (error) {
+      next(error);
+      // res.status(400).json({
+      //   success: false,
+      //   message: "failed to get data",
+      // });
+    }
+  }
+);
 
 app.post("/", logger, (req: Request, res: Response) => {
   console.log(req.body);
   res.json({
     message: "data received successfully ",
   });
+});
+
+// to handle any get request what not exist?
+app.all("*", (req: Request, res: Response) => {
+  res.status(400).json({
+    success: false,
+    message: "Route is not found",
+  });
+});
+
+/* ----------- GLOBAL ERROR HANDLER ---------- */
+app.use((error: any, req: Request, res: Response, next: NextFunction) => {
+  if (error) {
+    res.status(400).json({
+      success: false,
+      message: "Something went wrong!",
+    });
+  }
 });
 
 export default app;
